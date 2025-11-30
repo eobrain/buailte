@@ -1,0 +1,14 @@
+/* Enables buailte for Irish language text. */
+
+@font-face {
+  font-family: "Gentium Buailte";
+  src: url("Gentium-Buailte-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+[lang="ga"] {
+  font-family: "Gentium Buailte", serif;
+  font-variant-ligatures: common-ligatures;
+  font-feature-settings: "liga" 1;
+}
