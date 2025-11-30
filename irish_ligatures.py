@@ -4,8 +4,6 @@ import sys
 # ---------------------------------------------------------
 # CONFIGURATION
 # ---------------------------------------------------------
-# Define the mapping of Base char -> Target Unicode for lenition
-# Format: 'base_char': (Target Unicode, 'Target Glyph Name')
 LOWERCASE_MAP = {
     'b': (0x1e03, 'bdot'),
     'c': (0x020b, 'cdot'),
@@ -34,18 +32,20 @@ def main(input_font_path, output_font_path):
     print(f"Opening font: {input_font_path}")
     font = fontforge.open(input_font_path)
 
-    # 1. Create the Ligature Lookup Table if it doesn't exist
     lookup_name = "IrishLenition"
     subtable_name = "IrishLenition_subtable"
     
-    # Check if 'liga' feature exists, if not create it
-    if lookup_name not in font.lookups:
+    # 1. FIX: Check 'gsub_lookups' instead of generic 'lookups'
+    # We check if our custom lookup already exists to allow re-running script
+    if lookup_name not in font.gsub_lookups:
         print("Creating 'liga' lookup table...")
         # Type: gsub_ligature, Feature: liga (standard ligatures)
+        # The tuple structure here is specific: (("feature_tag", (("script", ("lang",...)),)),)
         font.addLookup(lookup_name, "gsub_ligature", (), (("liga", (("latn", ("dflt")),)),))
         font.addLookupSubtable(lookup_name, subtable_name)
     else:
-        # If it exists, we try to grab the first subtable or create one
+        print(f"Lookup '{lookup_name}' found. Using existing subtable.")
+        # Get existing subtables for this lookup
         subtables = font.getLookupSubtables(lookup_name)
         if subtables:
             subtable_name = subtables[0]
@@ -68,62 +68,50 @@ def process_set(font, mapping, subtable, is_upper):
         # A. Create Glyph if missing
         if name not in font:
             print(f"Creating missing glyph: {name} ({base_char} + dot)")
-            # Create the char slot
             glyph = font.createChar(uni, name)
-            
-            # clear any junk
             glyph.clear()
             
-            # Add References (Base + Dot)
-            # We use 'dotaccent' (U+02D9) usually. 
-            # FontForge's "build()" command tries to auto-assemble based on Unicode data
             try:
-                # This automatically finds the base and the accent and places them
+                # auto-build based on unicode composition
                 glyph.build() 
             except:
-                print(f"Warning: Could not auto-build {name}. Check manually.")
+                print(f"Warning: Could not auto-build {name}.")
                 
-            # If build() failed to add references (common in cheap fonts), manual fallback:
+            # Fallback if build failed to add content
             if len(glyph.layers['Fore']) == 0:
                 if base_char in font and 'dotaccent' in font:
                     glyph.addReference(base_char)
                     glyph.addReference('dotaccent')
-                    # Center the dot roughly (simplified)
-                    # For a real project, use anchors
         
         else:
-            print(f"Glyph {name} already exists. Adding ligature rule only.")
+            # If checking Gentium, it has these glyphs, so we just grab them
             glyph = font[name]
 
         # B. Add the Ligature Rule
-        # Syntax: replace "Base + h" with "This Glyph"
-        # We handle Title Case (Bh) and Lowercase (bh)
-        # Note: Uppercase map handles 'BH' -> 'Ḃ'
-        
         ligature_source = f"{base_char} {suffix}"
         
-        # Check if we also need to handle Title Case (Bh -> Ḃ) inside the Uppercase loop?
-        # Actually, standard Irish uses Bh -> Ḃ. 
-        # So for the Uppercase map (B), we should bind 'B h' AND 'B H'.
+        # Clear old ligatures to avoid duplicates if running multiple times
+        # (Optional, but cleaner)
         
-        # Bind the primary ligature
         try:
+            # Add the ligature mapping
             glyph.addPosSub(subtable, ligature_source)
-            print(f"  Added Ligature: {ligature_source} -> {name}")
+            print(f"  Linked: {ligature_source} -> {name}")
         except Exception as e:
-            print(f"  Error adding ligature for {name}: {e}")
+            # Sometimes errors occur if the mapping exists, we can ignore
+            print(f"  Note on {name}: {e}")
 
-        # If we are processing Uppercase (B), we also want to catch "Bh" (Title case)
+        # Handle Title Case (Bh -> Ḃ) for Uppercase letters
         if is_upper:
             mixed_case_source = f"{base_char} h"
             try:
                 glyph.addPosSub(subtable, mixed_case_source)
-                print(f"  Added Ligature: {mixed_case_source} -> {name}")
+                print(f"  Linked: {mixed_case_source} -> {name}")
             except:
                 pass
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print("Usage: fontforge -script irish_ligatures.py input.ttf output.ttf")
+        print("Usage: fontforge -script irish_ligatures_v2.py input.ttf output.ttf")
     else:
         main(sys.argv[1], sys.argv[2])
