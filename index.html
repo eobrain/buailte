@@ -1,17 +1,12 @@
 <!DOCTYPE html>
-<html lang="ga">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cló Gaelach Test: Gentium Buailte</title>
+    
+    <link rel="stylesheet" href="buailte.css">
     <style>
-        /* 1. LOAD THE FONT */
-        @font-face {
-            font-family: 'Gentium Buailte';
-            src: url('Gentium-Buailte-Regular.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-        }
 
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -47,13 +42,7 @@
 
         /* 2. CONFIGURE THE IRISH TEXT */
         .irish-text {
-            font-family: 'Gentium Buailte', serif;
             font-size: 1.8rem;
-            
-            /* THIS IS THE KEY: FORCE LIGATURES ON */
-            font-variant-ligatures: common-ligatures;
-            font-feature-settings: "liga" 1; 
-            
             /* Optional: Make it look nice */
             color: #2c3e50;
         }
@@ -78,7 +67,7 @@
 
     <div class="card">
         <span class="label">The Consonants (Type 'h' to trigger)</span>
-        <p class="irish-text">
+        <p class="irish-text" lang="ga">
             bh ch dh fh gh mh ph sh th <br>
             Bh Ch Dh Fh Gh Mh Ph Sh Th
         </p>
@@ -86,12 +75,12 @@
 
     <div class="card">
         <span class="label">Sample Sentence 1 (Simple)</span>
-        <p class="irish-text">
+        <p class="irish-text" lang="ga">
             Bhí an fear mór ag siúl ar an mbóthar.
         </p>
         
         <span class="label">Sample Sentence 2 (Heavy Lenition)</span>
-        <p class="irish-text">
+        <p class="irish-text" lang="ga">
             Chuaigh mo dheartháir go dtí an pháirc chun cluiche peile a imirt, ach bhí an ghrian ró-gheal.
         </p>
     </div>
@@ -101,14 +90,14 @@
         <div class="grid">
             <div>
                 <span class="label">Ligatures OFF (Standard)</span>
-                <p class="irish-text ligatures-off">
+                <p class="irish-text ligatures-off" lang="ga">
                     A Thiarna, déan trócaire orainn.<br>
                     Grá mo chroí.
                 </p>
             </div>
             <div>
                 <span class="label">Ligatures ON (Buailte)</span>
-                <p class="irish-text">
+                <p class="irish-text" lang="ga">
                     A Thiarna, déan trócaire orainn.<br>
                     Grá mo chroí.
                 </p>
@@ -127,5 +116,7 @@
         </p>
     </div>
 
+    <a
+
 </body>
-</html>
+<html>
